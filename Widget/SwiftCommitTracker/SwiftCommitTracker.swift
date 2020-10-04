@@ -13,14 +13,13 @@ struct CommitCheckerWidget: Widget {
     private let kind: String = "CommitCheckerWidget"
 
     public var body: some WidgetConfiguration {
-        StaticConfiguration(kind: kind, provider: CommitTimeline()) { entry in
+        IntentConfiguration(kind: kind, intent: LastCommitIntent.self, provider: CommitTimeline()) { entry in
             CommitCheckerWidgetView(entry: entry)
         }
-        .configurationDisplayName("Swift's Latest Commit")
-        .description("Shows the last commit at the Swift repo.")
+        .configurationDisplayName("A Repo's Latest Commit")
+        .description("Shows the last commit at the a repo/branch combination.")
     }
 }
-
 struct Commit {
     let message: String
     let author: String
@@ -33,16 +32,16 @@ struct LastCommitEntry: TimelineEntry {
 }
 
 struct CommitLoader {
-    static func fetch(completion: @escaping (Result<Commit, Error>) -> Void) {
-        let branchContentsURL = URL(string: "https://api.github.com/repos/apple/swift/branches/master")!
+    static func fetch(account: String, repo: String, branch: String, completion: @escaping (Result<Commit, Error>) -> Void) {
+        let branchContentsURL = URL(string: "https://api.github.com/repos/\(account)/\(repo)/branches/\(branch)")!
         let task = URLSession.shared.dataTask(with: branchContentsURL) { (data, response, error) in
-            guard error == nil else {
-                completion(.failure(error!))
-                return
+                    guard error == nil else {
+                        completion(.failure(error!))
+                        return
+                    }
+                    let commit = getCommitInfo(fromData: data!)
+                    completion(.success(commit))
             }
-            let commit = getCommitInfo(fromData: data!)
-            completion(.success(commit))
-        }
         task.resume()
     }
 
@@ -58,43 +57,79 @@ struct CommitLoader {
     }
 }
 
-struct CommitTimeline: TimelineProvider {
-    
-    func placeholder(in context: Context) -> LastCommitEntry {
+struct CommitTimeline: IntentTimelineProvider {
+    func placeholder(in context: Context) -> LastCommit {
         let currentDate = Date()
         let fakeCommit = Commit(message: "Fixed stuff", author: "John Appleseed", date: "2020-06-23")
-        return LastCommitEntry(date: currentDate, commit: fakeCommit)
+        let branch = RepoBranch(account: "fake account", repo: "fake repo", branch: "fake branch")
+        return LastCommit(date: currentDate, commit: fakeCommit, branch: branch)
     }
     
-    func getSnapshot(in context: Context, completion: @escaping (LastCommitEntry) -> Void) {
+    public func getSnapshot(for configuration: LastCommitIntent, in context: Context, completion: @escaping (LastCommit) -> ()) {
         let fakeCommit = Commit(message: "Fixed stuff", author: "John Appleseed", date: "2020-06-23")
-        let entry = LastCommitEntry(date: Date(), commit: fakeCommit)
+        let entry = LastCommit(
+            date: Date(),
+            commit: fakeCommit,
+            branch: RepoBranch(
+                account: "apple",
+                repo: "swift",
+                branch: "master"
+            )
+        )
         completion(entry)
     }
-    
-    func getTimeline(in context: Context, completion: @escaping (Timeline<LastCommitEntry>) -> Void) {
+
+    public func getTimeline(for configuration: LastCommitIntent, in context: Context, completion: @escaping (Timeline<Entry>) -> ()) {
         let currentDate = Date()
         let refreshDate = Calendar.current.date(byAdding: .minute, value: 5, to: currentDate)!
 
-        CommitLoader.fetch { result in
-            let commit: Commit
-            if case .success(let fetchedCommit) = result {
-                commit = fetchedCommit
-            } else {
-                commit = Commit(message: "Failed to load commits", author: "", date: "")
-            }
-            let entry = LastCommitEntry(date: currentDate, commit: commit)
+        guard let account = configuration.account,
+              let repo = configuration.repo,
+              let branch = configuration.branch
+        else {
+            let commit = Commit(message: "Failed to load commits", author: "", date: "")
+            let entry = LastCommit(date: currentDate, commit: commit, branch: RepoBranch(
+                account: "???",
+                repo: "???",
+                branch: "???"
+            ))
             let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
             completion(timeline)
+            return
         }
-    }
         
-    typealias Entry = LastCommitEntry
+        CommitLoader.fetch(account: account, repo: repo, branch: branch) { result in
+                    let commit: Commit
+                    if case .success(let fetchedCommit) = result {
+                        commit = fetchedCommit
+                    } else {
+                        commit = Commit(message: "Failed to load commits", author: "", date: "")
+                    }
+                    let entry = LastCommit(date: currentDate, commit: commit, branch: RepoBranch(
+                        account: account,
+                        repo: repo,
+                        branch: branch
+                    ))
+                    let timeline = Timeline(entries: [entry], policy: .after(refreshDate))
+                    completion(timeline)
+                }
+    }
+    
+    typealias Entry = LastCommit
+    typealias Intent = LastCommitIntent
+    
+}
+
+struct RepoBranch {
+    let account: String
+    let repo: String
+    let branch: String
 }
 
 struct LastCommit: TimelineEntry {
     public let date: Date
     public let commit: Commit
+    public let branch: RepoBranch
 
     var relevance: TimelineEntryRelevance? {
         return TimelineEntryRelevance(score: 10) // 0 - not important | 100 - very important
@@ -108,7 +143,7 @@ struct PlaceholderView : View {
 }
 
 struct CommitCheckerWidgetView : View {
-    let entry: LastCommitEntry
+    let entry: CommitTimeline.Entry
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {

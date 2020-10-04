@@ -18,6 +18,8 @@
 		81657E0D2527E06E00CFC327 /* SwiftCommitTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81657E0C2527E06E00CFC327 /* SwiftCommitTracker.swift */; };
 		81657E0F2527E06F00CFC327 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 81657E0E2527E06F00CFC327 /* Assets.xcassets */; };
 		81657E132527E06F00CFC327 /* SwiftCommitTrackerExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = 81657E052527E06E00CFC327 /* SwiftCommitTrackerExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		81657E1B2529E9D700CFC327 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 81657E1A2529E9D700CFC327 /* Intents.intentdefinition */; };
+		81657E1C2529E9D700CFC327 /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = 81657E1A2529E9D700CFC327 /* Intents.intentdefinition */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +61,7 @@
 		81657E0C2527E06E00CFC327 /* SwiftCommitTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftCommitTracker.swift; sourceTree = "<group>"; };
 		81657E0E2527E06F00CFC327 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		81657E102527E06F00CFC327 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		81657E1A2529E9D700CFC327 /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Intents.intentdefinition; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +130,7 @@
 			isa = PBXGroup;
 			children = (
 				81657E0C2527E06E00CFC327 /* SwiftCommitTracker.swift */,
+				81657E1A2529E9D700CFC327 /* Intents.intentdefinition */,
 				81657E0E2527E06F00CFC327 /* Assets.xcassets */,
 				81657E102527E06F00CFC327 /* Info.plist */,
 			);
@@ -236,6 +240,7 @@
 			files = (
 				81657DF12527E01B00CFC327 /* ViewController.swift in Sources */,
 				81657DED2527E01B00CFC327 /* AppDelegate.swift in Sources */,
+				81657E1B2529E9D700CFC327 /* Intents.intentdefinition in Sources */,
 				81657DEF2527E01B00CFC327 /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -244,6 +249,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				81657E1C2529E9D700CFC327 /* Intents.intentdefinition in Sources */,
 				81657E0D2527E06E00CFC327 /* SwiftCommitTracker.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
