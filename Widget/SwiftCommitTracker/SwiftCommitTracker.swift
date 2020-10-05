@@ -14,7 +14,7 @@ struct CommitCheckerWidget: Widget {
 
     public var body: some WidgetConfiguration {
         IntentConfiguration(kind: kind, intent: LastCommitIntent.self, provider: CommitTimeline()) { entry in
-            CommitCheckerWidgetView(entry: entry)
+            RepoBranchCheckerEntryView(entry: entry)
         }
         .configurationDisplayName("A Repo's Latest Commit")
         .description("Shows the last commit at the a repo/branch combination.")
@@ -59,10 +59,9 @@ struct CommitLoader {
 
 struct CommitTimeline: IntentTimelineProvider {
     func placeholder(in context: Context) -> LastCommit {
-        let currentDate = Date()
-        let fakeCommit = Commit(message: "Fixed stuff", author: "John Appleseed", date: "2020-06-23")
-        let branch = RepoBranch(account: "fake account", repo: "fake repo", branch: "fake branch")
-        return LastCommit(date: currentDate, commit: fakeCommit, branch: branch)
+        let fakeCommit = Commit(message: "message", author: "author", date: "date")
+        let branch = RepoBranch(account: "account", repo: "repo", branch: "branch")
+        return LastCommit(date: Date(), commit: fakeCommit, branch: branch)
     }
     
     public func getSnapshot(for configuration: LastCommitIntent, in context: Context, completion: @escaping (LastCommit) -> ()) {
@@ -136,21 +135,15 @@ struct LastCommit: TimelineEntry {
     }
 }
 
-struct PlaceholderView : View {
-    var body: some View {
-        Text("Loading...")
-    }
-}
-
-struct CommitCheckerWidgetView : View {
-    let entry: CommitTimeline.Entry
+struct RepoBranchCheckerEntryView : View {
+    var entry: CommitTimeline.Entry
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text("apple/swift's Latest Commit")
+            Text("\(entry.branch.account)/\(entry.branch.repo)'s \(entry.branch.branch) Latest Commit")
                 .font(.system(.title3))
                 .foregroundColor(.black)
-            Text(entry.commit.message)
+            Text("\(entry.commit.message)")
                 .font(.system(.callout))
                 .foregroundColor(.black)
                 .bold()
@@ -171,3 +164,4 @@ struct CommitCheckerWidgetView : View {
         return formatter.string(from: date)
     }
 }
+
